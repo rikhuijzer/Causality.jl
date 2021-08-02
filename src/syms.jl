@@ -10,7 +10,6 @@ A named variable to denote probability.
 """
 const P = SymbolicUtils.Sym{SymbolicUtils.FnType{Tuple, Number}}(:P)
 
-
 """
     d(x)
 
@@ -20,14 +19,10 @@ However, Julia's parser already uses `do`, so `d` seemed to be the most natural 
 """
 const d = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number}, Number}}(:d)
 
-sym_given = @syms |(u, v)
+"""
+    u ¦ v
 
-function _document_syms()
-    text = """
-        u | v
-
-        `u` given `v`.
-        """
-    # I have no idea 
-    # @doc text 
-end
+`u` given `v`.
+Using the broken bar (¦) instead of the vertical line (|), because the vertical line is already defined by Julia base.
+"""
+const (¦) = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number, Number}, Number}}(:|)

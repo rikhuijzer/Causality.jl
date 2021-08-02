@@ -1,13 +1,18 @@
 @testset "syms" begin
     @syms x u v w
 
-    # Validate the allowed number of args (probably easier method possible).
-    p_single_arg = @rule P(~u) => ~u + ~u
-    @eqtest p_single_arg(P(u)) == (2u)
+    @testset "allowed number of args" begin
+        # Probably, there is an easier test for this possible.
+        p_single_arg = @rule P(~u) => ~u + ~u
+        @eqtest p_single_arg(P(u)) == (2u)
 
-    p_multiple_args = @rule P(~u, ~v, ~w) => ~u + ~v + ~w
-    @eqtest p_multiple_args(P(u, v, w)) == (u + v + w)
+        p_multiple_args = @rule P(~u, ~v, ~w) => ~u + ~v + ~w
+        @eqtest p_multiple_args(P(u, v, w)) == (u + v + w)
 
-    d_single_arg = @rule d(~x) => ~x + ~x
-    @eqtest d_single_arg(d(x)) == (2x)
+        d_single_arg = @rule d(~x) => ~x + ~x
+        @eqtest d_single_arg(d(x)) == (2x)
+
+        given_single_arg = @rule ¦(~u, ~v) => ~u + ~v
+        @eqtest given_single_arg(u ¦ v) == (u + v)
+    end
 end

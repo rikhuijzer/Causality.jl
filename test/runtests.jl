@@ -18,3 +18,4 @@ end
 SymbolicUtils.show_simplified[] = false
 
 include("syms.jl")
+include("rules.jl")

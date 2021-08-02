@@ -1,10 +1,14 @@
 module Causality
 
+using Base
 using Reexport
 @reexport using SymbolicUtils
 
 include("syms.jl")
-export P, d
+export P, d, ¦
+
+include("rules.jl")
+export NodeSet
 
 function rewrite_sin()
     @syms w z
