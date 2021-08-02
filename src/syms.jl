@@ -1,4 +1,5 @@
 # Not using `@syms` in this file to be more flexible (allowing vargs) and avoid using `@doc`.
+# Use macroexpand(Main, :(@syms f(x))) to see what @syms would generate.
 
 """
     P(x)
@@ -7,21 +8,21 @@
 
 A named variable to denote probability.
 """
-P = SymbolicUtils.Sym{SymbolicUtils.FnType{Tuple, Number}}(:P)
+const P = SymbolicUtils.Sym{SymbolicUtils.FnType{Tuple, Number}}(:P)
 
-@syms d(x)
+
+"""
+    d(x)
+
+Do-operator.
+Pearl denotes this operator with `do`.
+However, Julia's parser already uses `do`, so `d` seemed to be the most natural alternative.
+"""
+const d = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number}, Number}}(:d)
+
 sym_given = @syms |(u, v)
 
 function _document_syms()
-
-    text = """
-        d(x)
-
-        Do-operator.
-        Unfortunately, the Julia parser will try to parse `do`, so `d` seemed to be most natural alternative.
-        """
-    @doc text d
-
     text = """
         u | v
 
@@ -30,5 +31,3 @@ function _document_syms()
     # I have no idea 
     # @doc text 
 end
-
-_document_syms()
