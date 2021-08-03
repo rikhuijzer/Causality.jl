@@ -1,5 +1,7 @@
 module Causality
 
+import CausalInference
+
 using Base
 using Reexport
 @reexport using LightGraphs

@@ -57,9 +57,9 @@ This blocks the path, because the node that emits an arrow overrides all other i
 function _arrow_emitting(G, path, Z::Set)::Bool
     E = collect(edges(G))
     # Arrow has to be fully on the path.
-    filter!(e -> !(e.src in path && e.dst in path), E)
+    filter!(e -> (e.src in path && e.dst in path), E)
     # Arrow has to be in `Z`.
-    filter!(e -> !(e.src in Z), E)
+    filter!(e -> (e.src in Z), E)
     return length(E) == 0 ? false : true
 end
 
@@ -107,7 +107,7 @@ function _paths(G::AbstractGraph, X::Set, Y::Set)
 end
 
 """
-    d_separate(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
+    d_separated(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
 
 Return whether `Z` blocks all paths from `X` to `Y` in graph `G`.
 In other words, whether `X` and `Y` are _d_-separated by `Z`, normally written as
@@ -120,18 +120,16 @@ Specifically, return whether for all bi-directional paths `path` from `X` to `Y`
 2. `path` contains at least one collision node that is outside `Z` and has no descendant
     in `Z`.
 
+**TODO:** Implement X::Set and Y::Set.
+
 [^Bareinboim2015]: Bareinboim, E., & Pearl, J. (2016). Causal inference and the data-fusion problem. Proceedings of the National Academy of Sciences, 113(27), 7345-7352.
 
 """
-function d_separate(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
+function d_separated(G::AbstractGraph, X::Int, Y::Int, Z::Set; verbose=false)::Bool
     @assert isdisjoint(X, Y)
     @assert isdisjoint(X, Z)
     @assert isdisjoint(Y, Z)
-    paths = _paths(G, X, Y)
-    # For all paths p from X to Y
-    # test whether
-    # p contains at least one arrow-emitting node that is in Z or
-    # p contains at least one collision node that is outside Z and has no descendant in Z.
+    CausalInference.dsep(G, X, Y, Z; verbose)
 end
 
 function apply_rule3(G::AbstractGraph, ex)

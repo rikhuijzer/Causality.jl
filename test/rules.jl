@@ -1,11 +1,40 @@
-@testset "d_separation" begin
-    G = SimpleDiGraph(Edge.([(2, 1), (2, 3)]))
-    path = [1, 2, 3]
+@testset "_arrow_emitting" begin
+    # Seems unnecessary thanks to CausalInference.dsep.
+    # Which is based on the algo in https://arxiv.org/abs/1304.1505.
+    G = SimpleDiGraph(Edge.([(1 => 2), (3 => 2)]))
     paths = Causality._paths(G, Set(1), Set(3))
     @test paths == [[1, 2, 3]]
-    # Z = [2]
-     #   function _arrow_emitting(G, path, Z::Set)::Bool
+    path = first(paths)
+    @test !Causality._arrow_emitting(G, path, Set(2))
+    @test Causality._arrow_emitting(G, path, Set(3))
+end
 
+@testset "d_separated" begin
+    nodes = [:Z1, :W1, :X, :Z3, :W3, :Y, :Z2, :W2]
+    mapping = Dict(zip(nodes, 1:length(nodes)))
+    m = mapping
+    edges = [
+        :Z1 => :W1,
+        :W1 => :X,
+        :Z1 => :Z3,
+        :Z3 => :X,
+        :Z2 => :Z3,
+        :Z2 => :W2,
+        :Z3 => :Y,
+        :W2 => :Y,
+        :W3 => :Y,
+        :X => :W3
+    ]
+    edges_num = [m[pair.first] => m[pair.second] for pair in edges]
+    G = SimpleDiGraph(Edge.(edges_num))
+
+    # Examples from <https://doi.org/10.1073/PNAS.1510507113>.
+    X = m[:Z1]
+    Y = m[:Y]
+    Z = Set([m[:X], m[:Z3], m[:W2]])
+    @test Causality.d_separated(G, X, Y, Z)
+    Z = Set([m[:X], m[:Z3], m[:W3]])
+    @test !(Causality.d_separated(G, X, Y, Z))
 end
 
 @testset "rules" begin
