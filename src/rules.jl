@@ -63,16 +63,8 @@ function _arrow_emitting(G, path, Z::Set)::Bool
     return length(E) == 0 ? false : true
 end
 
-function _paths(G::SimpleGraph, X::Int, Y::Int)
-    tree = dfs_tree(G, X)
-    paths = undirected_paths_search(G, X, Y)
-    @show collect(edges(tree))
-    # Thanks to sbromberger in https://github.com/JuliaGraphs/LightGraphs.jl/issues/599.
-    P = dijkstra_shortest_paths(G, X; allpaths=true, trackvertices=true)
-end
-
 """
-    _product(X::Set, Y::Set)
+    _product(X, Y)
 
 # Example
 ```jldoctest
@@ -84,7 +76,7 @@ julia> Causality._product(Set([1, 2]), Set([3, 4])) |> sort
  (2, 4)
 ```
 """
-function _product(X::Set, Y::Set)
+function _product(X, Y)
     P = Iterators.product(X, Y)
     P = vcat(P...)
     return P
@@ -109,9 +101,11 @@ end
 """
     d_separated(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
 
-Return whether `Z` blocks all paths from `X` to `Y` in graph `G`.
+Return whether the elements in `Z` block all paths from `X` to `Y` in graph `G`.
 In other words, whether `X` and `Y` are _d_-separated by `Z`, normally written as
 `X ⊥⊥ Y ¦ Z`.
+Note that when ``Z = \\{ A, B \\}``, then `X ⊥⊥ Y ¦ Z` can also be written as
+`X ⊥⊥ Y ¦ A, B`.
 
 Specifically, return whether for all bi-directional paths `path` from `X` to `Y`
 [^Bareinboim2015]:
@@ -119,8 +113,6 @@ Specifically, return whether for all bi-directional paths `path` from `X` to `Y`
 1. `path` contains at least one arrow-emitting node that is in `Z` _or_
 2. `path` contains at least one collision node that is outside `Z` and has no descendant
     in `Z`.
-
-**TODO:** Implement X::Set and Y::Set.
 
 [^Bareinboim2015]: Bareinboim, E., & Pearl, J. (2016). Causal inference and the data-fusion problem. Proceedings of the National Academy of Sciences, 113(27), 7345-7352.
 
@@ -132,6 +124,60 @@ function d_separated(G::AbstractGraph, X::Int, Y::Int, Z::Set; verbose=false)::B
     CausalInference.dsep(G, X, Y, Z; verbose)
 end
 
-function apply_rule3(G::AbstractGraph, ex)
-    
+function d_separated(G::AbstractGraph, X::Set, Y::Set, Z::Set; verbose=false)
+    return error("Not implemented.")
+end
+
+function nodes(G::AbstractGraph)
+    E = collect(edges(G))
+    nodes = unique(union(getproperty.(E, :src), getproperty.(E, :dst)))
+    return nodes
+end
+
+function X_Y_pairs(N::AbstractVector)
+    P = _product(N, N)
+    filter!(p -> first(p) != last(p), P)
+end
+
+"""
+    d_separated_combinations(G::SimpleDiGraph)
+
+Naive method to find all valid _d_-separated combinations for graph `G`.
+This is used for generating a set of rules for which the _d_-separation holds.
+Much more efficient would be to use the predicates for matching from SymbolicUtils.
+However, the matcher doesn't seem expressive enough yet to handle this.
+"""
+function d_separated_combinations(G::SimpleDiGraph, rule::Int)
+    N = nodes(G)
+    # Since only X::Int and Y::Int is implemented, this is relatively straightforward.
+    XYs = X_Y_pairs(N)
+    if rule == 2
+        valid_separations = map(XYs) do XY
+            X, Y = XY
+            # G = without_incoming(G, Set(X))
+            Z = Set(setdiff(N, [X, Y]))
+            # G = without_outgoing(G, Z)
+            if d_separated(G, X, Y, Set(Z))
+                return (; X, Y, Z)
+            end
+            return nothing
+        end
+        filter!(!isnothing, valid_separations)
+        return valid_separations
+    end
+end
+
+"""
+    generate_rule2(G::AbstractGraph)
+
+Naive (exhaustive) method to define valid rewrite rules.
+For each valid _d_-separated combination, generate a ruleset.
+"""
+function generate_rule2(G::AbstractGraph)
+    return ""
+end
+
+function apply_rule2(G::AbstractGraph, ex)
+    rule2 = @rule P(~y¦d(~x),d(~z),~w) => P(~y|d(~x),~z,~w)
+    # if d_separated(without_incoming(G, X), Y, Z, Set([X, W]))
 end

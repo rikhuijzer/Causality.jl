@@ -10,10 +10,11 @@
 end
 
 @testset "d_separated" begin
+    # Examples from <https://doi.org/10.1073/PNAS.1510507113>.
     nodes = [:Z1, :W1, :X, :Z3, :W3, :Y, :Z2, :W2]
     mapping = Dict(zip(nodes, 1:length(nodes)))
     m = mapping
-    edges = [
+    E = [
         :Z1 => :W1,
         :W1 => :X,
         :Z1 => :Z3,
@@ -25,10 +26,8 @@ end
         :W3 => :Y,
         :X => :W3
     ]
-    edges_num = [m[pair.first] => m[pair.second] for pair in edges]
+    edges_num = [m[pair.first] => m[pair.second] for pair in E]
     G = SimpleDiGraph(Edge.(edges_num))
-
-    # Examples from <https://doi.org/10.1073/PNAS.1510507113>.
     X = m[:Z1]
     Y = m[:Y]
     Z = Set([m[:X], m[:Z3], m[:W2]])
@@ -38,18 +37,16 @@ end
 end
 
 @testset "rules" begin
-    # Example from https://youtu.be/pZkCecwE-xE.
-    # For now, doing the mapping from symbols to integers manually.
     smoking = 1
     tar = 2
     cancer = 3
     genotype = 4
     smoking = 5
     edges = [
-        smoking => tar,
-        tar => cancer,
-        genotype => smoking,
-        genotype => cancer
+        s => t,
+        t => c,
+        g => s,
+        g => c
     ]
     G = SimpleDiGraphFromIterator(Edge.(edges))
 
@@ -60,7 +57,7 @@ end
     @test G_without_out == SimpleDiGraph(Edge.([genotype => smoking, genotype => cancer]))
 
     @syms Σt(x) c s t
-    before_rule3 = Σt(P(c¦d(s),d(t))P(t¦s))
-    after_rule3 = Σt(P(c¦d(s))P(t¦s))
+    before_rule2 = Σt(P(c¦d(s),t)P(t¦do(s)))
+    after_rule2 = Σt(P(c¦d(s),d(t)) P(t¦d(s))
     # @test rewrite(G, before_rule3) == after_rule3
 end
