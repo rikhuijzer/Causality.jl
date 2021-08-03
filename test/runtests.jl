@@ -30,4 +30,5 @@ end
 SymbolicUtils.show_simplified[] = false
 
 include("syms.jl")
+include("undirected_paths.jl")
 include("rules.jl")

@@ -64,9 +64,6 @@ Return all paths from `X` to `Y` in the undirected graph G.
 ```jldoctest
 julia> G = SimpleGraph(Edge.([(1, 2), (2, 3), (2, 4), (3, 4)]))
 {4, 4} undirected simple Int64 graph
-
-julia> Causality._paths(G, 1, 3)
-
 ```
 """
 function _paths(G::SimpleGraph, X::Int, Y::Int)
