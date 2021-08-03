@@ -1,5 +1,17 @@
 using Causality
+using Documenter
+using LightGraphs
 using Test
+
+DocMeta.setdocmeta!(
+    Causality,
+    :DocTestSetup,
+    :(using Causality);
+    recursive=true
+)
+
+Causality._update_module_doc()
+doctest(Causality)
 
 """
     eqtest(expr)

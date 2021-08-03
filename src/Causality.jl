@@ -4,11 +4,17 @@ using Base
 using Reexport
 @reexport using SymbolicUtils
 
+function _update_module_doc()
+    path = joinpath(pkgdir(Causality), "README.md")
+    text = read(path, String)
+    @doc text Causality
+end
+_update_module_doc()
+
 include("syms.jl")
 export P, d, ¦
 
 include("rules.jl")
-export NodeSet
 
 function rewrite_sin()
     @syms w z

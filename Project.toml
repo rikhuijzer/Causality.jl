@@ -1,12 +1,14 @@
 name = "Causality"
 uuid = "b2a1bc5b-dd7f-445c-a774-93b8450319b1"
-authors = ["Rik <rikhuijzer@pm.me>"]
+authors = ["Rik Huijzer <t.h.huijzer@rug.nl>"]
 version = "0.1.0"
 
 [deps]
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 
 [compat]
+LightGraphs = "1.3"
 Reexport = "1.1"
 SymbolicUtils = "0.13"
