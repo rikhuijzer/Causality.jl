@@ -44,3 +44,80 @@ function without_outgoing(G::AbstractGraph, X::Set)
     filter!(e -> !(e.src in X), E)
     return SimpleDiGraph(E)
 end
+
+"""
+    _arrow_emitting(path, Z::Set)::Bool
+
+Return whether one of the nodes emits an arrow **on the path** and is in `Z`.
+This blocks the path, because the node that emits an arrow overrides all other information.
+"""
+function _arrow_emitting(path, Z::Set)::Bool
+    # arrow_emitting_nodes = 
+end
+
+function _paths(G::SimpleGraph, X::Int, Y::Int)
+    
+end
+
+"""
+    _product(X::Set, Y::Set)
+
+# Example
+```jldoctest
+julia> Causality._product(Set([1, 2]), Set([3, 4])) |> sort
+4-element Vector{Tuple{Int64, Int64}}:
+ (1, 3)
+ (1, 4)
+ (2, 3)
+ (2, 4)
+```
+"""
+function _product(X::Set, Y::Set)
+    P = Base.Iterators.product(X, Y)
+    P = vcat(P...)
+    return P
+end
+
+"""
+    _paths(G::SimpleDiGraph, X::Set, Y::Set)
+
+Return all bi-directional paths from nodes in `X` to nodes in `Y`.
+Note that this **cannot** be calculated by combining the paths from `X` to `Y` in a DAGin
+both directions.
+To see why this is so, consider the graph `X -> V <- Y` which should return one path.
+"""
+function _paths(G::AbstractGraph, X::Set, Y::Set)
+    undirected_graph = SimpleGraph(G)
+    # P = 
+end
+
+"""
+    d_separate(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
+
+Return whether `Z` blocks all paths from `X` to `Y` in graph `G`.
+In other words, whether `X` and `Y` are _d_-separated by `Z`, normally written as
+`X ⊥⊥ Y ¦ Z`.
+
+Specifically, return whether for all bi-directional paths `path` from `X` to `Y` [^Bareinboim2015]:
+
+1. `path` contains at least one arrow-emitting node that is in `Z` _or_
+2. `path` contains at least one collision node that is outside `Z` and has no descendant in `Z`.
+
+[^Bareinboim2015]: Bareinboim, E., & Pearl, J. (2016). Causal inference and the data-fusion problem. Proceedings of the National Academy of Sciences, 113(27), 7345-7352.
+
+"""
+function d_separate(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
+    @assert isdisjoint(X, Y)
+    @assert isdisjoint(X, Z)
+    @assert isdisjoint(Y, Z)
+    forward_paths = paths(G, X, Y)
+    backward_paths = paths(reverse(G), X, Y)
+    # For all paths p from X to Y
+    # test whether
+    # p contains at least one arrow-emitting node that is in Z or
+    # p contains at least one collision node that is outside Z and has no descendant in Z.
+end
+
+function apply_rule3(G::AbstractGraph, ex)
+    
+end
