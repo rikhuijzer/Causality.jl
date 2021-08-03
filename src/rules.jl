@@ -55,8 +55,25 @@ function _arrow_emitting(path, Z::Set)::Bool
     # arrow_emitting_nodes = 
 end
 
+"""
+    _paths(G::SimpleGraph, X::Int, Y::Int)
+
+Return all paths from `X` to `Y` in the undirected graph G.
+
+# Example
+```jldoctest
+julia> G = SimpleGraph(Edge.([(1, 2), (2, 3), (2, 4), (3, 4)]))
+{4, 4} undirected simple Int64 graph
+
+julia> Causality._paths(G, 1, 3)
+
+```
+"""
 function _paths(G::SimpleGraph, X::Int, Y::Int)
-    
+    tree = dfs_tree(G, X)
+    @show collect(edges(tree))
+    # Thanks to sbromberger in https://github.com/JuliaGraphs/LightGraphs.jl/issues/599.
+    P = dijkstra_shortest_paths(G, X; allpaths=true, trackvertices=true)
 end
 
 """
@@ -73,7 +90,7 @@ julia> Causality._product(Set([1, 2]), Set([3, 4])) |> sort
 ```
 """
 function _product(X::Set, Y::Set)
-    P = Base.Iterators.product(X, Y)
+    P = Iterators.product(X, Y)
     P = vcat(P...)
     return P
 end
@@ -82,13 +99,15 @@ end
     _paths(G::SimpleDiGraph, X::Set, Y::Set)
 
 Return all bi-directional paths from nodes in `X` to nodes in `Y`.
-Note that this **cannot** be calculated by combining the paths from `X` to `Y` in a DAGin
+Note that this **cannot** be calculated by combining the paths from `X` to `Y` in a DAG in
 both directions.
 To see why this is so, consider the graph `X -> V <- Y` which should return one path.
 """
 function _paths(G::AbstractGraph, X::Set, Y::Set)
     undirected_graph = SimpleGraph(G)
-    # P = 
+    sources_destinations = _product(X, Y)
+    paths = [_paths(src, dst) for (src, dst) in sources_destinations]
+    paths = vcat(paths...)
 end
 
 """

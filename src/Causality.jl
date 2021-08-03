@@ -15,6 +15,7 @@ _update_module_doc()
 include("syms.jl")
 export P, d, ¦
 
+include("undirected_paths.jl")
 include("rules.jl")
 
 function rewrite_sin()
