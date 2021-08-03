@@ -157,6 +157,7 @@ function d_separated_combinations(G::SimpleDiGraph, rule::Int)
             # G = without_incoming(G, Set(X))
             Z = Set(setdiff(N, [X, Y]))
             # G = without_outgoing(G, Z)
+            # TODO: This gives an error probably because not all nodes in X and/or Y are still in G after the without_incoming and without_outgoing.
             if d_separated(G, X, Y, Set(Z))
                 return (; X, Y, Z)
             end
