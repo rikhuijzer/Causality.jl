@@ -1,3 +1,12 @@
+@testset "d_separation" begin
+    G = SimpleDiGraph(Edge.([(2, 1), (2, 3)]))
+    path = [1, 2, 3]
+    paths = Causality._paths(G, Set(1), Set(3))
+    @test paths == [[1, 2, 3]]
+    # Z = [2]
+     #   function _arrow_emitting(G, path, Z::Set)::Bool
+
+end
 
 @testset "rules" begin
     # Example from https://youtu.be/pZkCecwE-xE.

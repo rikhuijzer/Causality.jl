@@ -48,26 +48,24 @@ end
 """
     _arrow_emitting(path, Z::Set)::Bool
 
-Return whether one of the nodes emits an arrow **on the path** and is in `Z`.
+Return whether one of the nodes emits an arrow [^emit_note] and is in `Z`.
 This blocks the path, because the node that emits an arrow overrides all other information.
+
+[^emit_note]: Note that the arrow has to be emitted on the path.
+    So, the the destination has to also be on the path.
 """
-function _arrow_emitting(path, Z::Set)::Bool
-    # arrow_emitting_nodes = 
+function _arrow_emitting(G, path, Z::Set)::Bool
+    E = collect(edges(G))
+    # Arrow has to be fully on the path.
+    filter!(e -> !(e.src in path && e.dst in path), E)
+    # Arrow has to be in `Z`.
+    filter!(e -> !(e.src in Z), E)
+    return length(E) == 0 ? false : true
 end
 
-"""
-    _paths(G::SimpleGraph, X::Int, Y::Int)
-
-Return all paths from `X` to `Y` in the undirected graph G.
-
-# Example
-```jldoctest
-julia> G = SimpleGraph(Edge.([(1, 2), (2, 3), (2, 4), (3, 4)]))
-{4, 4} undirected simple Int64 graph
-```
-"""
 function _paths(G::SimpleGraph, X::Int, Y::Int)
     tree = dfs_tree(G, X)
+    paths = undirected_paths_search(G, X, Y)
     @show collect(edges(tree))
     # Thanks to sbromberger in https://github.com/JuliaGraphs/LightGraphs.jl/issues/599.
     P = dijkstra_shortest_paths(G, X; allpaths=true, trackvertices=true)
@@ -98,13 +96,14 @@ end
 Return all bi-directional paths from nodes in `X` to nodes in `Y`.
 Note that this **cannot** be calculated by combining the paths from `X` to `Y` in a DAG in
 both directions.
-To see why this is so, consider the graph `X -> V <- Y` which should return one path.
+To see why this is so, consider the graph `X -> V <- Y`, which should return one path.
 """
 function _paths(G::AbstractGraph, X::Set, Y::Set)
     undirected_graph = SimpleGraph(G)
     sources_destinations = _product(X, Y)
-    paths = [_paths(src, dst) for (src, dst) in sources_destinations]
+    paths = [undirected_paths(undirected_graph, s, d) for (s, d) in sources_destinations]
     paths = vcat(paths...)
+    return paths
 end
 
 """
@@ -114,10 +113,12 @@ Return whether `Z` blocks all paths from `X` to `Y` in graph `G`.
 In other words, whether `X` and `Y` are _d_-separated by `Z`, normally written as
 `X ⊥⊥ Y ¦ Z`.
 
-Specifically, return whether for all bi-directional paths `path` from `X` to `Y` [^Bareinboim2015]:
+Specifically, return whether for all bi-directional paths `path` from `X` to `Y`
+[^Bareinboim2015]:
 
 1. `path` contains at least one arrow-emitting node that is in `Z` _or_
-2. `path` contains at least one collision node that is outside `Z` and has no descendant in `Z`.
+2. `path` contains at least one collision node that is outside `Z` and has no descendant
+    in `Z`.
 
 [^Bareinboim2015]: Bareinboim, E., & Pearl, J. (2016). Causal inference and the data-fusion problem. Proceedings of the National Academy of Sciences, 113(27), 7345-7352.
 
@@ -126,8 +127,7 @@ function d_separate(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
     @assert isdisjoint(X, Y)
     @assert isdisjoint(X, Z)
     @assert isdisjoint(Y, Z)
-    forward_paths = paths(G, X, Y)
-    backward_paths = paths(reverse(G), X, Y)
+    paths = _paths(G, X, Y)
     # For all paths p from X to Y
     # test whether
     # p contains at least one arrow-emitting node that is in Z or

@@ -17,6 +17,7 @@ end
 
 function _search!(paths, path, G::SimpleGraph, seen, node, target)
     if node == target
+        push!(seen, target)
         seen = sort(collect(seen))
         push!(paths, seen)
         return nothing
@@ -36,13 +37,13 @@ function _search!(paths, path, G::SimpleGraph, seen, node, target)
 end
 
 """
-    undirected_paths_search(...
+    undirected_paths(G::SimpleGraph, source, target)
 
 Return all the paths that connect from and to in the undirected graph G.
 
 Credits to @rgrig at https://mathoverflow.net/questions/18603.
 """
-function undirected_paths_search(G::SimpleGraph, source, target)
+function undirected_paths(G::SimpleGraph, source, target)
     paths = []
     path = [source]
     seen = Set()
