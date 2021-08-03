@@ -20,3 +20,16 @@ end
 function edges2nums(mappings::EdgesMappings, edges::AbstractVector)
     return [edge2num(mappings, e) for e in edges]
 end
+
+"""
+    without_incoming(G, X::Set)
+
+Return a graph where all the arrows pointing to nodes in the set `X` in graph `G` have been
+removed.
+"""
+function without_incoming(G, X::Set)
+    E = LightGraphs.edges(G)
+    E = collect(E)
+    filter!(e -> !(e.dst in X), E)
+    return SimpleDiGraph(E)
+end

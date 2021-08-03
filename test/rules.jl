@@ -15,8 +15,11 @@
     ]
     G = SimpleDiGraphFromIterator(Edge.(edges))
 
-    @syms Σt c s t
-    # before_rule3 = Σt P(c¦d(s),d(t))P(t¦s)
-    # after_rule3 = Σt P(c¦d(s))P(t¦s)
+    G_without_in = Causality.without_incoming(G, Set([smoking, tar]))
+    @test G_without_in == SimpleDiGraph(Edge.([tar => cancer, genotype => cancer]))
+
+    @syms Σt(x) c s t
+    before_rule3 = Σt(P(c¦d(s),d(t))P(t¦s))
+    after_rule3 = Σt(P(c¦d(s))P(t¦s))
     # @test rewrite(G, before_rule3) == after_rule3
 end

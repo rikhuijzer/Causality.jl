@@ -2,6 +2,7 @@ module Causality
 
 using Base
 using Reexport
+@reexport using LightGraphs
 @reexport using SymbolicUtils
 
 function _update_module_doc()
