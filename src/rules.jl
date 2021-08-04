@@ -261,5 +261,5 @@ P(y | d(x), z, SymbolicUtils.Symbolic{Number}[w, v])
 ```
 """
 function rule2()
-    r = @rule P(~y¦d(~x),d(~z),~~w) => P(~y¦d(~x),~z,~~w)
+    r = @rule G(P(~y¦d(~x),d(~z),~~w)) => G(P(~y¦d(~x),~z,~~w))
 end
