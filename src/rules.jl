@@ -151,7 +151,7 @@ Note that, in the do-calculus rules, `W` can be empty, but `X` cannot.
 ```jldoctest
 julia> N = 1:4;
 
-julia> Any[Causality._Y_Z_X_W_tuples(N, 1, 2)...] |> sort
+julia> Vector{Any}(Causality._Y_Z_X_W_tuples(N, 1, 2)) |> sort
 3-element Vector{Any}:
  (Y = 1, Z = 2, X = [3], W = [4])
  (Y = 1, Z = 2, X = [3, 4], W = Int64[])
@@ -180,7 +180,7 @@ julia> N = 1:4;
 
 julia> YZs = [[1, 2]];
 
-julia> Any[Causality._Y_Z_X_W_tuples(N, YZs)...] |> sort
+julia> Vector{Any}(Causality._Y_Z_X_W_tuples(N, YZs)) |> sort
 3-element Vector{Any}:
  (Y = 1, Z = 2, X = [3], W = [4])
  (Y = 1, Z = 2, X = [3, 4], W = Int64[])
@@ -189,7 +189,7 @@ julia> Any[Causality._Y_Z_X_W_tuples(N, YZs)...] |> sort
 """
 function _Y_Z_X_W_tuples(N, YZs)
     YZXWs = [_Y_Z_X_W_tuples(N, Y, Z) for (Y, Z) in YZs]
-    YZXWs = Iterators.flatten(YZXWs)
+    YZXWs = collect(Iterators.flatten(YZXWs))
     return YZXWs
 end
 
