@@ -141,12 +141,32 @@ function _Y_Z_pairs(N::AbstractVector)
 end
 
 """
-    _X_Y_Z_W_tuples(N, X, Y)
+    _X_Y_Z_W_tuples(N, Y, Z)
 
+Find all possible combinations for `Y ⊥⊥ Z ¦ X, W` given all the nodes `N` and `Y` and `Z`.
+Note that, in the do-calculus rules, `W` can be empty, but `X` cannot.
+(X should not be empty, it seems, because do(x) where x is empty makes no sense.)
+
+# Example
+```jldoctest
+julia> N = 1:4;
+
+julia> Any[Causality._Y_Z_X_W_tuples(N, 1, 2)...] |> sort
+3-element Vector{Any}:
+ (Y = 1, Z = 2, X = [3], W = [4])
+ (Y = 1, Z = 2, X = [3, 4], W = Int64[])
+ (Y = 1, Z = 2, X = [4], W = [3])
+```
 """
 function _Y_Z_X_W_tuples(N, Y, Z)
-    rest = setdiff(setdiff(N, Y), Z)  # N - Y - Z.
-    
+    rest = setdiff(setdiff(N, Y), Z)
+    W = collect(Combinatorics.powerset(rest))
+    YZXWs = map(W) do w
+        X = setdiff(rest, w)
+        return (; Y, Z, X, W=w)
+    end
+    YZXWs = filter!(YZXW -> !isempty(YZXW.X), YZXWs)
+    return YZXWs
 end
 
 """
@@ -156,18 +176,21 @@ Find all possible combinations for `Y ⊥⊥ Z ¦ X, W` given pairs of Y and Z.
 
 # Example
 ```jldoctest
-julia> N = 1:5;
+julia> N = 1:4;
 
 julia> YZs = [[1, 2]];
 
-julia> Causality._Y_Z_X_W_tuples(N, YZs)
-x-element Vector:
- (
+julia> Any[Causality._Y_Z_X_W_tuples(N, YZs)...] |> sort
+3-element Vector{Any}:
+ (Y = 1, Z = 2, X = [3], W = [4])
+ (Y = 1, Z = 2, X = [3, 4], W = Int64[])
+ (Y = 1, Z = 2, X = [4], W = [3])
+```
 """
 function _Y_Z_X_W_tuples(N, YZs)
-    tuples = [_X_Y_Z_W_tuples(N, Y, Z) for (Y, Z) in YZs]
-    tuples = vcat(tuples...)
-    return tuples
+    YZXWs = [_Y_Z_X_W_tuples(N, Y, Z) for (Y, Z) in YZs]
+    YZXWs = Iterators.flatten(YZXWs)
+    return YZXWs
 end
 
 """

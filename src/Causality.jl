@@ -1,6 +1,7 @@
 module Causality
 
 import CausalInference
+import Combinatorics
 
 using Base
 using Reexport

@@ -57,7 +57,6 @@ end
     G_without_out = C.without_outgoing(G, Set([s, t]))
     @test G_without_out == SimpleDiGraph(Edge.([g => s, g => c]))
 
-    
     # expected = Set([(X=
     # rule = 2
     # @test Set(C.d_separated_combinations(G, rule)) == expected
