@@ -121,7 +121,12 @@ function d_separated(G::AbstractGraph, X::Int, Y::Int, Z::Set; verbose=false)::B
     @assert isdisjoint(X, Y)
     @assert isdisjoint(X, Z)
     @assert isdisjoint(Y, Z)
+    @assert length(nodes(G)) != 0
     return CausalInference.dsep(G, X, Y, Z; verbose)
+end
+
+function d_separated(G::AbstractGraph, X::Int, Y::Int, Z::Vector; verbose=false)::Bool
+    return d_separated(G, X, Y, Set(Z); verbose)
 end
 
 function d_separated(G::AbstractGraph, X::Set, Y::Set, Z::Set; verbose=false)
@@ -194,49 +199,67 @@ function _Y_Z_X_W_tuples(N, YZs)
 end
 
 """
-    d_separated_combinations(G::SimpleDiGraph)
+    d_separated_combinations(G::SimpleDiGraph, rule::Symbol)
 
 Naive method to find all valid _d_-separated combinations for graph `G`.
 This is used for generating a set of rules for which the _d_-separation holds.
-Much more efficient would be to use the predicates for matching from SymbolicUtils.
-However, the matcher doesn't seem expressive enough yet to handle this.
+Much more efficient would be to use the predicates for matching from SymbolicUtils with
+memoize.
+However, the matcher doesn't seem expressive enough (yet) to handle this.
 """
-function d_separated_combinations(G::SimpleDiGraph, rule::Int)
+function d_separated_combinations(G::SimpleDiGraph, rule::Symbol)
     N = nodes(G)
     # Since only X::Int and Y::Int is implemented, this is relatively straightforward.
     YZs = _Y_Z_pairs(N)
     YZXWs = _Y_Z_X_W_tuples(N, YZs)
-    if rule == 2
-        valid_separations = map(XYs) do XY
-            X, Y = XY
+    if rule == :rule2
+        valid_separations = map(YZXWs) do YZXW
+            Y, Z, X, W = YZXW
+            @show YZXW
             G = without_incoming(G, Set(X))
-            Z = Set(setdiff(N, [X, Y]))
-            G = without_outgoing(G, Z)
-            N = nodes(G)
-            X in N || return nothing
-            Y in N || return nothing
-            Z = filter!(z -> z in N, Z)
-            if d_separated(G, X, Y, Set(Z))
-                return (; X, Y, Z)
+            G = without_outgoing(G, Set(Z))
+            isempty(nodes(G)) && return missing
+            if d_separated(G, Y, Z, X)
+                # @show edges(G) |> collect
+                # @show YZXW
+                return YZXW
             end
-            return nothing
+            return missing
         end
-        filter!(!isnothing, valid_separations)
+        valid_separations = collect(skipmissing(valid_separations))
         return valid_separations
     end
+    error("Not implemented")
 end
 
 """
-    generate_rule2(G::AbstractGraph)
+    rule2_applicable(G::SimpleDiGraph, Y, Z, X, W)::Bool
 
-Naive (exhaustive) method to define valid rewrite rules.
-For each valid _d_-separated combination, generate a ruleset.
+Return whether rule 2 is applicable given graph `G` with Y, Z, X and W.
+In other words, return true if ``(Y \\perp Z | X, W)_{G_{\\overline{x} \\underline{z}}}``.
 """
-function generate_rule2(G::AbstractGraph)
-    return ""
+function rule2_applicable(G::SimpleDiGraph, Y, Z, X, W)::Bool
+    G = without_incoming(G, Set(X))
+    G = without_outgoing(G, Set(Z))
+    isempty(nodes(G)) && return false  # Or true? Not sure.
+    return d_separated(G, Y, Z, X)
 end
 
-function apply_rule2(G::AbstractGraph, ex)
-    rule2 = @rule P(~y¦d(~x),d(~z),~w) => P(~y|d(~x),~z,~w)
-    # if d_separated(without_incoming(G, X), Y, Z, Set([X, W]))
+"""
+    rule2()
+
+# Example
+```jldoctest
+julia> @syms y x z w v;
+
+julia> r = Causality.rule2();
+
+julia> eq = P(y¦d(x),d(z),w,v);
+
+julia> r(eq)
+P(y | d(x), z, SymbolicUtils.Symbolic{Number}[w, v])
+```
+"""
+function rule2()
+    r = @rule P(~y¦d(~x),d(~z),~~w) => P(~y¦d(~x),~z,~~w)
 end

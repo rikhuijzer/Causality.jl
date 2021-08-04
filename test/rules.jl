@@ -38,18 +38,21 @@ end
 
 @testset "rules" begin
     # From https://youtu.be/pZkCecwE-xE.
+    # See also https://youtu.be/9X4pR4jvKmM?t=1025 for the same example with more
+    # explanation.
     s = 1  # smoking
     t = 2  # tar
     c = 3  # cancer
     g = 4  # genotype
-    s = 5  # smoking
-    edges = [
+    E = [
         s => t,
         t => c,
         g => s,
         g => c
     ]
-    G = SimpleDiGraphFromIterator(Edge.(edges))
+    E = Edge.(E)
+    G = SimpleDiGraphFromIterator(E)
+    @test Set(C.nodes(G)) == Set([1, 2, 3, 4])
 
     G_without_in = C.without_incoming(G, Set([s, t]))
     @test G_without_in == SimpleDiGraph(Edge.([t => c, g => c]))
@@ -65,4 +68,9 @@ end
     # before_rule2 = Σt(P(c¦d(s),t)P(t¦d(s)))
     # after_rule2 = Σt(P(c¦d(s),d(t)) P(t¦d(s)))
     # @test rewrite(G, before_rule3) == after_rule3
+
+    # TODO: Implement this somehow.
+    # Probably, first need to implement P(y¦x,z) etc. for comma, we could use 
+    # before_rule2 = P(y¦d(x),d(z),w) with G
+    # after_rule2 = P(y¦d(x),z,w) with G
 end
