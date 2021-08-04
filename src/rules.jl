@@ -121,7 +121,7 @@ function d_separated(G::AbstractGraph, X::Int, Y::Int, Z::Set; verbose=false)::B
     @assert isdisjoint(X, Y)
     @assert isdisjoint(X, Z)
     @assert isdisjoint(Y, Z)
-    CausalInference.dsep(G, X, Y, Z; verbose)
+    return CausalInference.dsep(G, X, Y, Z; verbose)
 end
 
 function d_separated(G::AbstractGraph, X::Set, Y::Set, Z::Set; verbose=false)
@@ -134,9 +134,40 @@ function nodes(G::AbstractGraph)
     return nodes
 end
 
-function X_Y_pairs(N::AbstractVector)
+function _Y_Z_pairs(N::AbstractVector)
     P = _product(N, N)
     filter!(p -> first(p) != last(p), P)
+    return P
+end
+
+"""
+    _X_Y_Z_W_tuples(N, X, Y)
+
+"""
+function _Y_Z_X_W_tuples(N, Y, Z)
+    rest = setdiff(setdiff(N, Y), Z)  # N - Y - Z.
+    
+end
+
+"""
+    _Y_Z_X_W_tuples(N, YZs)
+
+Find all possible combinations for `Y ⊥⊥ Z ¦ X, W` given pairs of Y and Z.
+
+# Example
+```jldoctest
+julia> N = 1:5;
+
+julia> YZs = [[1, 2]];
+
+julia> Causality._Y_Z_X_W_tuples(N, YZs)
+x-element Vector:
+ (
+"""
+function _Y_Z_X_W_tuples(N, YZs)
+    tuples = [_X_Y_Z_W_tuples(N, Y, Z) for (Y, Z) in YZs]
+    tuples = vcat(tuples...)
+    return tuples
 end
 
 """
@@ -150,14 +181,18 @@ However, the matcher doesn't seem expressive enough yet to handle this.
 function d_separated_combinations(G::SimpleDiGraph, rule::Int)
     N = nodes(G)
     # Since only X::Int and Y::Int is implemented, this is relatively straightforward.
-    XYs = X_Y_pairs(N)
+    YZs = _Y_Z_pairs(N)
+    YZXWs = _Y_Z_X_W_tuples(N, YZs)
     if rule == 2
         valid_separations = map(XYs) do XY
             X, Y = XY
-            # G = without_incoming(G, Set(X))
+            G = without_incoming(G, Set(X))
             Z = Set(setdiff(N, [X, Y]))
-            # G = without_outgoing(G, Z)
-            # TODO: This gives an error probably because not all nodes in X and/or Y are still in G after the without_incoming and without_outgoing.
+            G = without_outgoing(G, Z)
+            N = nodes(G)
+            X in N || return nothing
+            Y in N || return nothing
+            Z = filter!(z -> z in N, Z)
             if d_separated(G, X, Y, Set(Z))
                 return (; X, Y, Z)
             end

@@ -3,15 +3,17 @@ using Documenter
 using LightGraphs
 using Test
 
+C = Causality
+
 DocMeta.setdocmeta!(
-    Causality,
+    C,
     :DocTestSetup,
     :(using Causality);
     recursive=true
 )
 
-Causality._update_module_doc()
-doctest(Causality)
+C._update_module_doc()
+doctest(C)
 
 """
     eqtest(expr)

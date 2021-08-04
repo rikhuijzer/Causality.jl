@@ -8,7 +8,7 @@ using Reexport
 @reexport using SymbolicUtils
 
 function _update_module_doc()
-    path = joinpath(pkgdir(Causality), "README.md")
+    path = joinpath(@__DIR__, "..", "README.md")
     text = read(path, String)
     @doc text Causality
 end

@@ -5,8 +5,8 @@
     paths = Causality._paths(G, Set(1), Set(3))
     @test paths == [[1, 2, 3]]
     path = first(paths)
-    @test !Causality._arrow_emitting(G, path, Set(2))
-    @test Causality._arrow_emitting(G, path, Set(3))
+    @test !C._arrow_emitting(G, path, Set(2))
+    @test C._arrow_emitting(G, path, Set(3))
 end
 
 @testset "d_separated" begin
@@ -31,17 +31,18 @@ end
     X = m[:Z1]
     Y = m[:Y]
     Z = Set([m[:X], m[:Z3], m[:W2]])
-    @test Causality.d_separated(G, X, Y, Z)
+    @test C.d_separated(G, X, Y, Z)
     Z = Set([m[:X], m[:Z3], m[:W3]])
-    @test !(Causality.d_separated(G, X, Y, Z))
+    @test !(C.d_separated(G, X, Y, Z))
 end
 
 @testset "rules" begin
-    smoking = 1
-    tar = 2
-    cancer = 3
-    genotype = 4
-    smoking = 5
+    # From https://youtu.be/pZkCecwE-xE.
+    s = 1  # smoking
+    t = 2  # tar
+    c = 3  # cancer
+    g = 4  # genotype
+    s = 5  # smoking
     edges = [
         s => t,
         t => c,
@@ -50,14 +51,19 @@ end
     ]
     G = SimpleDiGraphFromIterator(Edge.(edges))
 
-    G_without_in = Causality.without_incoming(G, Set([smoking, tar]))
-    @test G_without_in == SimpleDiGraph(Edge.([tar => cancer, genotype => cancer]))
+    G_without_in = C.without_incoming(G, Set([s, t]))
+    @test G_without_in == SimpleDiGraph(Edge.([t => c, g => c]))
 
-    G_without_out = Causality.without_outgoing(G, Set([smoking, tar]))
-    @test G_without_out == SimpleDiGraph(Edge.([genotype => smoking, genotype => cancer]))
+    G_without_out = C.without_outgoing(G, Set([s, t]))
+    @test G_without_out == SimpleDiGraph(Edge.([g => s, g => c]))
+
+    
+    # expected = Set([(X=
+    # rule = 2
+    # @test Set(C.d_separated_combinations(G, rule)) == expected
 
     @syms Σt(x) c s t
-    before_rule2 = Σt(P(c¦d(s),t)P(t¦do(s)))
-    after_rule2 = Σt(P(c¦d(s),d(t)) P(t¦d(s))
+    # before_rule2 = Σt(P(c¦d(s),t)P(t¦d(s)))
+    # after_rule2 = Σt(P(c¦d(s),d(t)) P(t¦d(s)))
     # @test rewrite(G, before_rule3) == after_rule3
 end
