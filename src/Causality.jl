@@ -22,7 +22,7 @@ include("undirected_paths.jl")
 include("rules.jl")
 
 include("multivar_predicate.jl")
-export lhs_term, @dorule, DoRule
+export success
 
 function rewrite_sin()
     @syms w z
