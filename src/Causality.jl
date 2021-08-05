@@ -21,6 +21,9 @@ export P, d, ¦
 include("undirected_paths.jl")
 include("rules.jl")
 
+include("multivar_predicate.jl")
+export lhs_term, @dorule, DoRule
+
 function rewrite_sin()
     @syms w z
     r1 = @rule sin(2(~x)) => 2sin(~x) * cos(~x)
