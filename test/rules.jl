@@ -1,14 +1,3 @@
-@testset "_arrow_emitting" begin
-    # Seems unnecessary thanks to CausalInference.dsep.
-    # Which is based on the algo in https://arxiv.org/abs/1304.1505.
-    G = SimpleDiGraph(Edge.([(1 => 2), (3 => 2)]))
-    paths = Causality._paths(G, Set(1), Set(3))
-    @test paths == [[1, 2, 3]]
-    path = first(paths)
-    @test !C._arrow_emitting(G, path, Set(2))
-    @test C._arrow_emitting(G, path, Set(3))
-end
-
 @testset "d_separated" begin
     # Examples from <https://doi.org/10.1073/PNAS.1510507113>.
     nodes = [:Z1, :W1, :X, :Z3, :W3, :Y, :Z2, :W2]
@@ -73,4 +62,11 @@ end
     # Probably, first need to implement P(y¦x,z) etc. for comma, we could use 
     # before_rule2 = P(y¦d(x),d(z),w) with G
     # after_rule2 = P(y¦d(x),z,w) with G
+end
+
+@testset "rule2" begin
+    @syms a b c d e
+    eq = P(a¦Do(b),Do(c),d,e)
+    expected = P(P(a ¦ Do(b), c, SymbolicUtils.Symbolic{Number}[d]), e)
+    @eqtest rule2(eq) == expected
 end

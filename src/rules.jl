@@ -1,5 +1,5 @@
 struct EdgesMappings
-    name2num::Dict
+    name2num::Dict  # Should be Base.ImmutableDict
     num2name::Dict
 end
 
@@ -46,24 +46,6 @@ function without_outgoing(G::AbstractGraph, X::Set)
 end
 
 """
-    _arrow_emitting(path, Z::Set)::Bool
-
-Return whether one of the nodes emits an arrow [^emit_note] and is in `Z`.
-This blocks the path, because the node that emits an arrow overrides all other information.
-
-[^emit_note]: Note that the arrow has to be emitted on the path.
-    So, the the destination has to also be on the path.
-"""
-function _arrow_emitting(G, path, Z::Set)::Bool
-    E = collect(edges(G))
-    # Arrow has to be fully on the path.
-    filter!(e -> (e.src in path && e.dst in path), E)
-    # Arrow has to be in `Z`.
-    filter!(e -> (e.src in Z), E)
-    return length(E) == 0 ? false : true
-end
-
-"""
     _product(X, Y)
 
 # Example
@@ -83,29 +65,11 @@ function _product(X, Y)
 end
 
 """
-    _paths(G::SimpleDiGraph, X::Set, Y::Set)
-
-Return all bi-directional paths from nodes in `X` to nodes in `Y`.
-Note that this **cannot** be calculated by combining the paths from `X` to `Y` in a DAG in
-both directions.
-To see why this is so, consider the graph `X -> V <- Y`, which should return one path.
-"""
-function _paths(G::AbstractGraph, X::Set, Y::Set)
-    undirected_graph = SimpleGraph(G)
-    sources_destinations = _product(X, Y)
-    paths = [undirected_paths(undirected_graph, s, d) for (s, d) in sources_destinations]
-    paths = vcat(paths...)
-    return paths
-end
-
-"""
-    d_separated(G::AbstractGraph, X::Set, Y::Set, Z::Set)::Bool
+    d_separated(G::AbstractGraph, X::Int, Y::Int, Z::Set)::Bool
 
 Return whether the elements in `Z` block all paths from `X` to `Y` in graph `G`.
 In other words, whether `X` and `Y` are _d_-separated by `Z`, normally written as
 `X ⊥⊥ Y ¦ Z`.
-Note that when ``Z = \\{ A, B \\}``, then `X ⊥⊥ Y ¦ Z` can also be written as
-`X ⊥⊥ Y ¦ A, B`.
 
 Specifically, return whether for all bi-directional paths `path` from `X` to `Y`
 [^Bareinboim2015]:
@@ -139,99 +103,6 @@ function nodes(G::AbstractGraph)
     return nodes
 end
 
-function _Y_Z_pairs(N::AbstractVector)
-    P = _product(N, N)
-    filter!(p -> first(p) != last(p), P)
-    return P
-end
-
-"""
-    _X_Y_Z_W_tuples(N, Y, Z)
-
-Find all possible combinations for `Y ⊥⊥ Z ¦ X, W` given all the nodes `N` and `Y` and `Z`.
-Note that, in the do-calculus rules, `W` can be empty, but `X` cannot.
-(X should not be empty, it seems, because do(x) where x is empty makes no sense.)
-
-# Example
-```jldoctest
-julia> N = 1:4;
-
-julia> Vector{Any}(Causality._Y_Z_X_W_tuples(N, 1, 2)) |> sort
-3-element Vector{Any}:
- (Y = 1, Z = 2, X = [3], W = [4])
- (Y = 1, Z = 2, X = [3, 4], W = Int64[])
- (Y = 1, Z = 2, X = [4], W = [3])
-```
-"""
-function _Y_Z_X_W_tuples(N, Y, Z)
-    rest = setdiff(setdiff(N, Y), Z)
-    W = collect(Combinatorics.powerset(rest))
-    YZXWs = map(W) do w
-        X = setdiff(rest, w)
-        return (; Y, Z, X, W=w)
-    end
-    YZXWs = filter!(YZXW -> !isempty(YZXW.X), YZXWs)
-    return YZXWs
-end
-
-"""
-    _Y_Z_X_W_tuples(N, YZs)
-
-Find all possible combinations for `Y ⊥⊥ Z ¦ X, W` given pairs of Y and Z.
-
-# Example
-```jldoctest
-julia> N = 1:4;
-
-julia> YZs = [[1, 2]];
-
-julia> Vector{Any}(Causality._Y_Z_X_W_tuples(N, YZs)) |> sort
-3-element Vector{Any}:
- (Y = 1, Z = 2, X = [3], W = [4])
- (Y = 1, Z = 2, X = [3, 4], W = Int64[])
- (Y = 1, Z = 2, X = [4], W = [3])
-```
-"""
-function _Y_Z_X_W_tuples(N, YZs)
-    YZXWs = [_Y_Z_X_W_tuples(N, Y, Z) for (Y, Z) in YZs]
-    YZXWs = collect(Iterators.flatten(YZXWs))
-    return YZXWs
-end
-
-"""
-    d_separated_combinations(G::SimpleDiGraph, rule::Symbol)
-
-Naive method to find all valid _d_-separated combinations for graph `G`.
-This is used for generating a set of rules for which the _d_-separation holds.
-Much more efficient would be to use the predicates for matching from SymbolicUtils with
-memoize.
-However, the matcher doesn't seem expressive enough (yet) to handle this.
-"""
-function d_separated_combinations(G::SimpleDiGraph, rule::Symbol)
-    N = nodes(G)
-    # Since only X::Int and Y::Int is implemented, this is relatively straightforward.
-    YZs = _Y_Z_pairs(N)
-    YZXWs = _Y_Z_X_W_tuples(N, YZs)
-    if rule == :rule2
-        valid_separations = map(YZXWs) do YZXW
-            Y, Z, X, W = YZXW
-            @show YZXW
-            G = without_incoming(G, Set(X))
-            G = without_outgoing(G, Set(Z))
-            isempty(nodes(G)) && return missing
-            if d_separated(G, Y, Z, X)
-                # @show edges(G) |> collect
-                # @show YZXW
-                return YZXW
-            end
-            return missing
-        end
-        valid_separations = collect(skipmissing(valid_separations))
-        return valid_separations
-    end
-    error("Not implemented")
-end
-
 """
     rule2_applicable(G::SimpleDiGraph, Y, Z, X, W)::Bool
 
@@ -246,20 +117,57 @@ function rule2_applicable(G::SimpleDiGraph, Y, Z, X, W)::Bool
 end
 
 """
-    rule2()
+    YZXW(Y::Int, Z::Int, X::Set{Int}, W::Set{Int})
 
-# Example
-```
-julia> @syms y x z w v;
-
-julia> r = Causality.rule2();
-
-julia> eq = P(y¦d(x),d(z),w,v);
-
-julia> r(eq)
-P(y | d(x), z, SymbolicUtils.Symbolic{Number}[w, v])
-```
+Struct containing the nodes for the predicate checks which are based around ``(Y \\perp Z | X, W)``.
+`Y` and `Z` are `Int`s, because `d_separated` cannot handle `Set`s yet.
 """
-function rule2()
-    r = @rule G(P(~y¦d(~x),d(~z),~~w)) => G(P(~y¦d(~x),~z,~~w))
+struct YZXW
+    Y::Int
+    Z::Int
+    X::Set{Int}
+    W::Set{Int}
+end
+
+"""
+    bindings2yzxw(bindings, mapping::Dict)::YZXW
+
+For all three of the rules, we have to check some predicate based around ``(Y \\perp Z | X, W)``.
+This step goes from the expression (lowercase) to the predicate (uppercase).
+"""
+function bindings2yzxw(bindings, mapping::Dict)::YZXW
+    Y = bindings[:y]
+    Z = bindings[:z]
+    X = bindings[:x]
+    W = bindings[:w]
+    return YZXW(Y, Z, X, W)
+end
+
+function rule2_checker(G::SimpleDiGraph)
+    function rule2_applicable(bindings)
+        Y, Z, X, W = bindings2yzxw(G, bindings)
+        rule2_applicable(G, Y, Z, X, W)
+    end
+
+    function success(bindings, n)
+        if n == 1
+            rule2_applicable(bindings) || return nothing
+            return rhs(bindings)
+        else
+            return nothing
+        end
+    end
+    return success
+end
+
+"""
+    rule2(eq)
+
+Apply rule 2 once on `eq`.
+"""
+function rule2(eq)
+    r = @acrule P(~y¦Do(~x),Do(~z),~~w) => P(~y¦Do(~x),~z,~~w)
+    consequent = r(eq)
+    # consequent = r(eq, rule2_checker(G))
+    return consequent
 end

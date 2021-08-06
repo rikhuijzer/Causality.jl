@@ -16,13 +16,12 @@ end
 _update_module_doc()
 
 include("syms.jl")
-export P, d, ¦
+export P, Do, ¦
 
 include("undirected_paths.jl")
-include("rules.jl")
-
 include("multivar_predicate.jl")
-export success
+include("rules.jl")
+export rule2
 
 function rewrite_sin()
     @syms w z
