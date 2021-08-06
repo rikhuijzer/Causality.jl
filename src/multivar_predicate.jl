@@ -1,13 +1,31 @@
+"""
+    success(rhs)
+
+An example success function.
+This is an example of how to add a predicate to check the bindings before reporting a match.
+"""
 function success(rhs)
+    mypredicate(bindings) = true
+
     function success(bindings, n)
         @show bindings
         @show n
         @show rhs(bindings)
-        return n == 1 ? rhs(bindings) : nothing
+        if n == 1
+            mypredicate(bindings) || return nothing
+            return rhs(bindings)
+        else
+            return nothing
+        end
     end
     return success
 end
 
+"""
+    (r::SymbolicUtils.Rule)(term, success::Function)
+
+Allow for overriding the success function to check a predicate inside it.
+"""
 function (r::SymbolicUtils.Rule)(term, success::Function)
     rhs = r.rhs
     success_closure = success(rhs)
@@ -19,6 +37,11 @@ function (r::SymbolicUtils.Rule)(term, success::Function)
     end
 end
 
+"""
+    (acr::SymbolicUtils.ACRule)(term, success)
+
+Same as (r::SymbolicUtils.Rule)(term, success::Function) but then for an ACRule.
+"""
 function (acr::SymbolicUtils.ACRule)(term, success)
     Rule = SymbolicUtils.Rule
     istree = SymbolicUtils.istree

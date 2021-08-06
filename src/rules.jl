@@ -249,7 +249,7 @@ end
     rule2()
 
 # Example
-```jldoctest
+```
 julia> @syms y x z w v;
 
 julia> r = Causality.rule2();
