@@ -66,7 +66,12 @@ end
 
 @testset "rule2" begin
     @syms a b c d e
-    eq = P(a¦Do(b),Do(c),d,e)
+
+    eq = P(a ¦ Do(b), Do(c), d, e)
     expected = P(P(a ¦ Do(b), c, SymbolicUtils.Symbolic{Number}[d]), e)
+    @eqtest rule2(eq) == P(P(a ¦ Do(b), c, SymbolicUtils.Symbolic{Number}[d]), e)
+
+    eq = rule2(P(a ¦ Do(b), e, Do(c), d))
+    expected = P((a ¦ Do(b), c, SymbolicUtils.Symbolic{Number}[e]), d)
     @eqtest rule2(eq) == expected
 end

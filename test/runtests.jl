@@ -13,7 +13,7 @@ DocMeta.setdocmeta!(
 )
 
 C._update_module_doc()
-doctest(C)
+# doctest(C)
 
 """
     eqtest(expr)
@@ -31,7 +31,7 @@ macro eqtest(expr)
 end
 SymbolicUtils.show_simplified[] = false
 
-include("syms.jl")
-include("undirected_paths.jl")
+# include("syms.jl")
+# include("undirected_paths.jl")
 include("rules.jl")
-include("multivar_predicate.jl")
+# include("multivar_predicate.jl")
