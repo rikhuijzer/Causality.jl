@@ -3,17 +3,17 @@ using Documenter
 using LightGraphs
 using Test
 
-C = Causality
+M = Causality
 
 DocMeta.setdocmeta!(
-    C,
+    M,
     :DocTestSetup,
     :(using Causality);
     recursive=true
 )
 
-C._update_module_doc()
-# doctest(C)
+M._update_module_doc()
+doctest(M)
 
 """
     eqtest(expr)
@@ -31,7 +31,8 @@ macro eqtest(expr)
 end
 SymbolicUtils.show_simplified[] = false
 
-# include("syms.jl")
-# include("undirected_paths.jl")
+include("syms.jl")
+include("undirected_paths.jl")
 include("rules.jl")
-# include("multivar_predicate.jl")
+include("multivar_predicate.jl")
+include("simplify_rules.jl")

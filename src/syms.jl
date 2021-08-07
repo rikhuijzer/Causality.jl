@@ -25,4 +25,4 @@ const Do = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number}, Number}}(:Do)
 `u` given `v`.
 Using the broken bar (¦) instead of the vertical line (|), because the vertical line is already defined by Julia base.
 """
-const (¦) = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number, Number}, Number}}(:|)
+const (¦) = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number, Number}, Number}}(:¦)

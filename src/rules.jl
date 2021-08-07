@@ -166,8 +166,7 @@ end
 Apply rule 2 once on `eq`.
 """
 function rule2(eq)
-    # First, I need to get the PR merged to allow creating rules with predicates.
-    # Then, I need to implement src/simplify_rules.jl.
+    # TODO: implement src/simplify_rules.jl.
     r = @acrule P(~y * (Do(~x) + Do(~z) + ~~w)) => (~y * (Do(~x) + ~z + ~~w))
     return r(eq)
     move_do_forward = @rule (~w, Do(~x), Do(~y)) => (Do(~x), Do(~y), ~w)
@@ -178,3 +177,5 @@ function rule2(eq)
     consequent = rewriter(eq)
     return consequent
 end
+
+

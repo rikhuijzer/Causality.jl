@@ -1,5 +1,6 @@
 module Causality
 
+import Base: union
 import CausalInference
 import Combinatorics
 
@@ -15,6 +16,9 @@ function _update_module_doc()
 end
 _update_module_doc()
 
+SU = SymbolicUtils
+export SU
+
 include("syms.jl")
 export P, Do, ¦
 
@@ -22,6 +26,8 @@ include("undirected_paths.jl")
 include("multivar_predicate.jl")
 include("rules.jl")
 export rule2
+
+include("simplify_rules.jl")
 
 function rewrite_sin()
     @syms w z
