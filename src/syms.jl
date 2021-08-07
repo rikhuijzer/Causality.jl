@@ -24,5 +24,7 @@ const Do = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number}, Number}}(:Do)
 
 `u` given `v`.
 Using the broken bar (¦) instead of the vertical line (|), because the vertical line is already defined by Julia base.
+
+Probably, the vertical line could be used by defining it for sets.
 """
 const (¦) = SymbolicUtils.Sym{(SymbolicUtils.FnType){Tuple{Number, Number}, Number}}(:¦)

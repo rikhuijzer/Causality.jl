@@ -5,7 +5,7 @@
 CONDITIONAL_PROBABILITY_RULES = [
     # P(A1 ∪ A2 ∪ A3 ... | B) = P(A1 | B) + P(A2 | B) + P(A3 | B) + ...
     # TODO: Check that sets A are disjoint.
-    @acrule P(+(~~A) ¦ ~~B) => +([P(a, ~~B...) for a in ~~A]...)
+    @acrule P(+(~~A) ¦ ~~B) => +([P(¦(a, ~~B...)) for a in ~~A]...)
     # +(P(~~A ¦ ~~B))
 ]
 
