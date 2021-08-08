@@ -26,7 +26,7 @@ export P, Do, ¦
 include("undirected_paths.jl")
 include("multivar_predicate.jl")
 include("graphs.jl")
-export graph
+export graph, name2node
 
 include("rules.jl")
 export rule2

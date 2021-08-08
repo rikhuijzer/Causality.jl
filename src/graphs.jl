@@ -65,6 +65,7 @@ end
     graph(edges::Vector{Pair{Symbol, Symbol}})::MetaDiGraph
 
 Return a MetaDiGraph from the `edges` where all the vertices have a `:name` property.
+See also `name2node`[@ref].
 
 # Example
 ```jldoctest
@@ -74,6 +75,9 @@ julia> G = graph(edges);
 
 julia> get_prop(G, 1, :name)
 :U
+
+julia> name2node(G, :U)
+1
 """
 function graph(edges::Vector{Pair{Symbol, Symbol}})::MetaDiGraph
     N = unique(union(first.(edges), last.(edges)))
@@ -86,4 +90,16 @@ function graph(edges::Vector{Pair{Symbol, Symbol}})::MetaDiGraph
     foreach(k -> set_prop!(G, k, :name, int2sym[k]), keys(int2sym))
 
     return G
+end
+
+"""
+    name2node(G::MetaDiGraph, name::Symbol)::Int
+
+Return the node for a given `name`.
+"""
+function name2node(G::MetaDiGraph, name::Symbol)::Int
+    V = filter_vertices(G, :name, name)
+    V = collect(V)
+    @assert length(V) == 1
+    return first(V)
 end
