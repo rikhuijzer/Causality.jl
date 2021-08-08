@@ -9,10 +9,6 @@ CONDITIONAL_PROBABILITY_RULES = [
     @acrule P(+(~~A), ~~B) => +([P(a, ~~B...) for a in ~~A]...)
 ]
 
-# Make sure to put a simplified version at the lhs
-# (https://github.com/JuliaSymbolics/SymbolicUtils.jl/issues/331).
-acrule2 = @acrule P(~y, ~z + Do(~x) + Do(~w)) => P(~y, ~z + Do(~x) + ~w)
-
 SSet = SU.Symbolic{<:Set}
 SN = SU.Symbolic{<:Number}
 
