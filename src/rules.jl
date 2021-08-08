@@ -11,11 +11,11 @@ function rule2_applicable(G::SimpleDiGraph, Y, Z, X, W)::Bool
     return d_separated(G, Y, Z, X)
 end
 
-function rule2(G::SimpleDiGraph, y, z, x, w)
+function rule2(G::MetaDiGraph, y, z, x, w)
     return true
 end
 
-function rule2(G::SimpleDiGraph)
+function rule2(G::MetaDiGraph)
     # Make sure to put a simplified version at the lhs
     # (https://github.com/JuliaSymbolics/SymbolicUtils.jl/issues/331).
 

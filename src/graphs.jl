@@ -60,3 +60,30 @@ function nodes(G::AbstractGraph)
     nodes = unique(union(getproperty.(E, :src), getproperty.(E, :dst)))
     return nodes
 end
+
+"""
+    graph(edges::Vector{Pair{Symbol, Symbol}})::MetaDiGraph
+
+Return a MetaDiGraph from the `edges` where all the vertices have a `:name` property.
+
+# Example
+```jldoctest
+julia> edges = [:U => :V, :V => :W];
+
+julia> G = graph(edges);
+
+julia> get_prop(G, 1, :name)
+:U
+"""
+function graph(edges::Vector{Pair{Symbol, Symbol}})::MetaDiGraph
+    N = unique(union(first.(edges), last.(edges)))
+    sym2int = Dict(zip(N, 1:length(N)))
+    edges = [Edge(sym2int[src] => sym2int[dst]) for (src, dst) in edges]
+    G = SimpleDiGraph(edges)
+    G = MetaDiGraph(G)
+
+    int2sym = Dict(zip(1:length(N), N))
+    foreach(k -> set_prop!(G, k, :name, int2sym[k]), keys(int2sym))
+
+    return G
+end

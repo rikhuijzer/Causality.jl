@@ -7,6 +7,7 @@ import Combinatorics
 using Base
 using Reexport
 @reexport using LightGraphs
+@reexport using MetaGraphs
 @reexport using SymbolicUtils
 
 function _update_module_doc()
@@ -25,6 +26,8 @@ export P, Do, ¦
 include("undirected_paths.jl")
 include("multivar_predicate.jl")
 include("graphs.jl")
+export graph
+
 include("rules.jl")
 export rule2
 

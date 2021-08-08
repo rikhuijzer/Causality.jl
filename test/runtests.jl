@@ -1,6 +1,7 @@
 using Causality
 using Documenter
 using LightGraphs
+using MetaGraphs
 using Test
 
 M = Causality
