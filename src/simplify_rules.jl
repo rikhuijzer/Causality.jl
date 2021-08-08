@@ -5,10 +5,13 @@
 
 CONDITIONAL_PROBABILITY_RULES = [
     # P(A1 ∪ A2 ∪ A3 ... | B) = P(A1 | B) + P(A2 | B) + P(A3 | B) + ...
-    # TODO: Check that sets A are disjoint.
+    # TODO: Check that sets ~~A are disjoint.
     @acrule P(+(~~A), ~~B) => +([P(a, ~~B...) for a in ~~A]...)
-    # +(P(~~A ¦ ~~B))
 ]
+
+# Make sure to put a simplified version at the lhs
+# (https://github.com/JuliaSymbolics/SymbolicUtils.jl/issues/331).
+acrule2 = @acrule P(~y, ~z + Do(~x) + Do(~w)) => P(~y, ~z + Do(~x) + ~w)
 
 SSet = SU.Symbolic{<:Set}
 SN = SU.Symbolic{<:Number}
@@ -20,7 +23,8 @@ function causal_simplifier()
 end
 
 function causal_simplify(x)
-    f = causal_simplifier()
+    simplifiers = [SU.serial_simplifier, causal_simplifier()]
+    f = SU.Chain(simplifiers)
     simplified = SU.PassThrough(f)(x)
     return simplified
 end
