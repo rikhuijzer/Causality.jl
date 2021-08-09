@@ -9,6 +9,7 @@
         :Z => :Y
     ]
     G = graph(edges)
+    @test [name2node(G, s) for s in [:U, :X, :Z, :Y]] == [1, 2, 3, 4]
     r = rule2(G)
     @eqtest r(P(y, x + Do(z))) == P(y, x + z)
     # @eqtest r(P(u, b + Do(c) + Do(d))) == P(a, b + Do(c) + d)

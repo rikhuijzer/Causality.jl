@@ -8,21 +8,19 @@ function rule2_applicable(G::AbstractGraph, Y, Z, X, W)::Bool
     G = without_incoming(G, Set(X))
     G = without_outgoing(G, Set(Z))
     isempty(nodes(G)) && return false  # Or true? Not sure.
-    return d_separated(G, Y, Z, X)
+    return d_separated(G, Y, Z, Set(X))
 end
 
 sym2uppercase(s::Symbol) = Symbol(uppercase(string(s)))
-sym2uppercase(s::SymbolicUtils.Sym{Number, Nothing}) = sym2uppercase(s.name)
+name2node(G, s::SymbolicUtils.Sym) = name2node(G, sym2uppercase(s.name))
+name2node(G, s::Set) = s
 
-function rule2(G::MetaDiGraph, y, z, x; w=nothing)
-    Y = name2node(G, sym2uppercase(y))
-    @show Y
-    Z = name2node(G, sym2uppercase(z))
-    Z = Set(Z)
-    X = name2node(G, sym2uppercase(x))
-    W = isnothing(w) ? Set() : name2node(G, sym2uppercase(w))
+function rule2(G::MetaDiGraph, y, z, x, w)
+    Y = name2node(G, y)
+    Z = name2node(G, z)
+    X = name2node(G, x)
+    W = name2node(G, w)
     out = rule2_applicable(G, Y, Z, X, W)
-    @show out
     return out
 end
 
@@ -30,7 +28,9 @@ function rule2(G::MetaDiGraph)
     # Make sure to put a simplified version at the lhs
     # (https://github.com/JuliaSymbolics/SymbolicUtils.jl/issues/331).
 
-    r = @acrule P(~y, ~z + Do(~x)) => rule2(G, ~y, ~z, ~x) ? P(~y, ~z + ~x) : nothing
+    # r = @acrule P(~y, ~z + Do(~x)) => rule2(G, ~y, ~z, ~x) ? P(~y, ~z + ~x) : nothing
+    # Rule 2 (eq. 3.32) where x is empty.
+    r = @acrule P(~y, ~x + Do(~z)) => rule2(G, ~y, ~z, ~x, Set()) ? P(~y, ~x + ~z) : nothing
     return r
 end
 

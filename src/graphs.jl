@@ -51,8 +51,18 @@ function d_separated(G::AbstractGraph, X::Int, Y::Int, Z::Vector; verbose=false)
     return d_separated(G, X, Y, Set(Z); verbose)
 end
 
-function d_separated(G::AbstractGraph, X::Set, Y::Set, Z::Set; verbose=false)
-    return error("Not implemented.")
+function d_separated(G::AbstractGraph, X, Y, Z::Set; verbose=false)
+    if length(X) == 1
+        X = first(X)
+    else
+        error("Not implemented")
+    end
+    if length(Y) == 1
+        Y = first(Y)
+    else
+        error("Not implemented")
+    end
+    d_separated(G, X, Y, Z; verbose)
 end
 
 function nodes(G::AbstractGraph)
