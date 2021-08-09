@@ -12,6 +12,7 @@ end
 
 sym2uppercase(s::Symbol) = Symbol(uppercase(string(s)))
 name2node(G, s::SymbolicUtils.Sym) = name2node(G, sym2uppercase(s.name))
+name2node(G, S::AbstractArray) = Set([name2node(G, s) for s in S])
 name2node(G, s::Set) = s
 
 function rule2(G::MetaDiGraph, y, z, x, w)
@@ -25,11 +26,13 @@ end
 
 function rule2(G::MetaDiGraph)
     # Make sure to put a simplified version at the lhs
+    # This even holds when not using the infix operator.
+    # So, +(a, b), in nested expressions, is not always the same as +(b, a).
     # (https://github.com/JuliaSymbolics/SymbolicUtils.jl/issues/331).
 
     forms = [
         # Rule 2 (Pearl, 2009; eq. 3.32) where x is empty.
-        @acrule(P(~y, ~x + Do(~z)) => rule2(G, ~y, ~z, ~x, Set()) ? P(~y, ~x + ~z) : nothing),
+        @acrule(P(~y, +(~~w, Do(~z))) => rule2(G, ~y, ~z, ~~w, Set()) ? P(~y, +(~z, ~~w...)) : nothing),
         # Rule 2 (Pearl, 2009; eq. 3.32) where x and w are empty.
         @acrule(P(~y, Do(~z)) => rule2(G, ~y, ~z, Set(), Set()) ? P(~y, ~z) : nothing)
     ]

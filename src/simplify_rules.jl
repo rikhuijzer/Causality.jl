@@ -18,7 +18,17 @@ function causal_simplifier()
     return SU.If(SU.istree, SU.Fixpoint(conditional_simplifier()))
 end
 
-function causal_simplify(x)
+"""
+    identify(G, query)
+
+Given a graph `G` and a `query`, identify the causal effect if possible.
+This retuns a probability expression involving only observed quantities
+(Pearl, 2009; Corollary 3.4.2).
+
+Unlike Pearl's do-calculus, the implementation in this package is, currently, unlikely to
+be complete.
+"""
+function identify(x)
     simplifiers = [SU.serial_simplifier, causal_simplifier()]
     f = SU.Chain(simplifiers)
     simplified = SU.PassThrough(f)(x)
