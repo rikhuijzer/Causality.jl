@@ -7,7 +7,6 @@ In other words, return true if ``(Y \\perp Z | X, W)_{G_{\\overline{x} \\underli
 function rule2_applicable(G::AbstractGraph, Y, Z, X, W)::Bool
     G = without_incoming(G, Set(X))
     G = without_outgoing(G, Set(Z))
-    isempty(nodes(G)) && return false  # Or true? Not sure.
     return d_separated(G, Y, Z, Set(X))
 end
 
@@ -28,9 +27,13 @@ function rule2(G::MetaDiGraph)
     # Make sure to put a simplified version at the lhs
     # (https://github.com/JuliaSymbolics/SymbolicUtils.jl/issues/331).
 
-    # r = @acrule P(~y, ~z + Do(~x)) => rule2(G, ~y, ~z, ~x) ? P(~y, ~z + ~x) : nothing
-    # Rule 2 (eq. 3.32) where x is empty.
-    r = @acrule P(~y, ~x + Do(~z)) => rule2(G, ~y, ~z, ~x, Set()) ? P(~y, ~x + ~z) : nothing
-    return r
+    forms = [
+        # Rule 2 (Pearl, 2009; eq. 3.32) where x is empty.
+        @acrule(P(~y, ~x + Do(~z)) => rule2(G, ~y, ~z, ~x, Set()) ? P(~y, ~x + ~z) : nothing),
+        # Rule 2 (Pearl, 2009; eq. 3.32) where x and w are empty.
+        @acrule(P(~y, Do(~z)) => rule2(G, ~y, ~z, Set(), Set()) ? P(~y, ~z) : nothing)
+    ]
+
+    return SU.Chain(forms)
 end
 
