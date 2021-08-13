@@ -13,6 +13,7 @@ using Reexport
 function _update_module_doc()
     path = joinpath(@__DIR__, "..", "README.md")
     text = read(path, String)
+    text = replace(text, "```julia" => "```jldoctest")
     @doc text Causality
 end
 _update_module_doc()
