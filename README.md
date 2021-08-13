@@ -9,8 +9,8 @@ Automatically determine whether a causal effect is identifiable.
 
 This package is work in progress.
 Applying the rules is going to be possible (see proof of concept below), but this is not going to be enough for all cases.
-In some cases, it is necessary to apply a rule in the opposite direction to be able to rewrite succesfully.
-I was advized to look into [Metatheory.jl](https://github.com/0x0f0f0f/Metatheory.jl) and/or backtracking to solve that problem.
+In some cases, it is necessary to apply a rule in the opposite direction to be able to rewrite successfully.
+I was advised to look into [Metatheory.jl](https://github.com/0x0f0f0f/Metatheory.jl) and/or backtracking to solve that problem.
 
 ## Example
 
