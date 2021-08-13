@@ -2,6 +2,7 @@ using Causality
 using Documenter
 using LightGraphs
 using MetaGraphs
+using SymbolicUtils
 using Test
 
 M = Causality
