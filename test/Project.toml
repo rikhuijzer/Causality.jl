@@ -2,6 +2,7 @@
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
+SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
